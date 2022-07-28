@@ -13,7 +13,7 @@ function handleError(
       message: err.message,
     });
   else
-    res.status(500).send({
+    res.status(400).send({
       success: false,
       message: err.message,
     });

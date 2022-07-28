@@ -1,11 +1,11 @@
 import { User } from "../schema/user.schema";
 
+import { AuthResponse } from "../common/dtos/auth.dto";
 import {
   comparePassword,
   hashPassword,
   tokenify,
 } from "../common/utils/auth.util";
-import { AuthResponse, ProfileResponse } from "../common/dtos/auth.dto";
 
 export class AuthService {
   static login = async (
@@ -24,7 +24,7 @@ export class AuthService {
     } else {
       return {
         email: user.email,
-        token: tokenify(user.email, user.id),
+        token: tokenify(user.id, user.email),
       };
     }
   };
@@ -45,13 +45,29 @@ export class AuthService {
     };
   };
 
-  static profile = async (id: string): Promise<ProfileResponse> => {
+  static checkUser = async (email: string): Promise<boolean> => {
     const user = await User.findOne({
-      id: id,
+      email: email,
     }).exec();
-    return {
-      id: user?.id,
-      email: user?.email as string,
-    };
+
+    return !!user;
+  };
+
+  static passwordlessLogin = async (email: string): Promise<AuthResponse> => {
+    const user = await User.findOne({
+      email: email,
+    })
+      .exec()
+      .catch(() => {
+        throw new Error("User not found");
+      });
+    if (!user) {
+      throw new Error("Invalid email");
+    } else {
+      return {
+        email: user.email,
+        token: tokenify(user.id, user.email),
+      };
+    }
   };
 }

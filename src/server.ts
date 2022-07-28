@@ -1,13 +1,16 @@
-import express, { Express } from "express";
-import { config } from "dotenv";
 import cors from "cors";
-import { authRouter } from "./routes/auth.route";
-import handleError from "./common/utils/error-handler";
-import { errorRouter } from "./routes/error.route";
+import { config } from "dotenv";
+import express, { Express } from "express";
 import mongoose from "mongoose";
-import { authMiddleware } from "./middleware/auth.middleware";
+import morgan from "morgan";
+import passport from "passport";
+import handleError from "./common/utils/error-handler";
 import { appConfig } from "./config/app.config";
-
+import { twitterInitialize } from "./infrastructure/passport/passport.provider";
+import { profileRouter } from "./routes";
+import { authRouter } from "./routes/auth.route";
+import { errorRouter } from "./routes/error.route";
+import cookieSession from "cookie-session";
 config();
 let app: Express;
 
@@ -22,6 +25,7 @@ function setupRoutes() {
     })
   );
   app.use("/auth", authRouter);
+  app.use("/", profileRouter);
 
   // Error handler
   app.use(handleError);
@@ -30,13 +34,13 @@ function setupRoutes() {
 }
 
 function setupMiddleware() {
+  app.use(morgan("dev"));
   app.use(express.json());
   app.use(
     express.urlencoded({
       extended: true,
     })
   );
-  app.use(authMiddleware);
 }
 
 async function setupDatabase() {
@@ -50,9 +54,22 @@ async function setupDatabase() {
     });
 }
 
+function setupPassport() {
+  app.use(
+    cookieSession({
+      name: "session",
+      keys: [appConfig.cookieKey],
+      secure: false,
+    })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
+  twitterInitialize();
+}
 async function main() {
   await setupDatabase();
   setupExpress();
+  setupPassport();
   setupMiddleware();
   setupRoutes();
   app.listen(appConfig.port, () => {
