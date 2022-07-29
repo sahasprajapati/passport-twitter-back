@@ -9,64 +9,67 @@ import {
 
 export class AuthService {
   static login = async (
-    email: string,
+    username: string,
     password: string
   ): Promise<AuthResponse> => {
     const user = await User.findOne({
-      email: email,
+      username: username,
     })
       .exec()
       .catch(() => {
         throw new Error("User not found");
       });
     if (!user || !comparePassword(password, user.password as string)) {
-      throw new Error("Invalid email or password");
+      throw new Error("Invalid username or password");
     } else {
       return {
-        email: user.email,
-        token: tokenify(user.id, user.email),
+        username: user.username,
+        token: tokenify(user.id, user.username),
       };
     }
   };
 
   static register = async (
-    email: string,
+    username: string,
     password: string
   ): Promise<AuthResponse> => {
-    const newUser = new User({ email: email });
+    const newUser = new User({ username: username });
     newUser.password = await hashPassword(password);
+
     const res = await newUser.save().catch(() => {
       throw new Error("Error while creating user. User already exist");
     });
 
     return {
-      email: newUser.email,
-      token: tokenify(res.id, res.email),
+      username: newUser.username,
+      token: tokenify(res.id, res.username),
     };
   };
 
-  static checkUser = async (email: string): Promise<boolean> => {
+  static checkUser = async (username: string): Promise<boolean> => {
     const user = await User.findOne({
-      email: email,
+      username: username,
     }).exec();
 
     return !!user;
   };
 
-  static passwordlessLogin = async (email: string): Promise<AuthResponse> => {
+  static passwordlessLogin = async (
+    username: string
+  ): Promise<AuthResponse> => {
     const user = await User.findOne({
-      email: email,
+      username: username,
     })
       .exec()
       .catch(() => {
         throw new Error("User not found");
       });
     if (!user) {
-      throw new Error("Invalid email");
+      throw new Error("Invalid username");
     } else {
       return {
-        email: user.email,
-        token: tokenify(user.id, user.email),
+        username: user.username,
+        token: tokenify(user.id, user.username),
       };
     }
   };

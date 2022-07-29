@@ -1,7 +1,7 @@
 import { Response } from "./response.dto";
 
 interface Auth {
-  email: string;
+  username: string;
 }
 export interface AuthDTO extends Auth {
   password: string;

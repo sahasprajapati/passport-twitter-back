@@ -12,9 +12,6 @@ export const twitterInitialize = () => {
         callbackURL: "http://localhost:4000/auth/twitter/redirect",
       },
       (token: any, tokenSecret: any, profile: any, cb: any) => {
-        console.log("token", token);
-        console.log("token", tokenSecret);
-        console.log("token", profile);
         return cb(null, profile);
       }
     )

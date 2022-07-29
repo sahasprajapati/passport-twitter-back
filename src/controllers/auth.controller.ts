@@ -2,17 +2,17 @@ import { AuthDTO, AuthResponseDTO } from "../common/dtos/auth.dto";
 import { AuthService } from "../services/auth.service";
 
 export class AuthController {
-  static login = async ({ email, password }: AuthDTO) => {
+  static login = async ({ username, password }: AuthDTO) => {
     const res = new AuthResponseDTO();
-    res.data = await AuthService.login(email, password);
+    res.data = await AuthService.login(username, password);
     res.success = true;
     res.message = "Login successful";
 
     return res;
   };
-  static register = async ({ email, password }: AuthDTO) => {
+  static register = async ({ username, password }: AuthDTO) => {
     const res = new AuthResponseDTO();
-    res.data = await AuthService.register(email, password);
+    res.data = await AuthService.register(username, password);
     res.message = "User registration successful";
 
     return res;
